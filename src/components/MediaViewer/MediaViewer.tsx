@@ -13,6 +13,8 @@ import {
   Wand2,
   Image,
   Ban,
+  PencilRuler,
+  ScissorsSquare,
 } from "lucide-react";
 
 import Container from "@/components/Container";
@@ -40,7 +42,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CloudinaryResourceT } from "@/types/Cloudinary";
-import { CldImage, CldImageProps } from "next-cloudinary";
+import { CldImageProps } from "next-cloudinary";
+import CldImage from "@/components/CldImage";
 interface Deletion {
   state: string;
 }
@@ -58,7 +61,6 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResourceT }) => {
   const [enhancements, setEnhanements] = useState<
     "remove-background" | "restore" | "improve" | undefined
   >(undefined);
-  console.log(enhancements);
 
   type TransformationsT = Omit<CldImageProps, "src" | "alt">;
   const transformations: TransformationsT = {};
@@ -141,6 +143,7 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResourceT }) => {
       document.body.removeEventListener("click", handleOnOutsideClick);
     };
   }, []);
+  console.log("enhancements: ", enhancements);
 
   return (
     <div className="h-screen bg-black px-0">
@@ -195,7 +198,9 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResourceT }) => {
                 <li>
                   <Button
                     variant="ghost"
-                    className={`text-left justify-start w-full h-14 border-4 bg-zinc-700 border-white`}
+                    className={`text-left justify-start w-full h-14 border-4 bg-zinc-700 ${
+                      !enhancements ? "border-white" : "border-transparent"
+                    }`}
                     onClick={() => setEnhanements(undefined)}
                   >
                     <Ban className="w-5 h-5 mr-3" />
@@ -205,30 +210,42 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResourceT }) => {
                 <li>
                   <Button
                     variant="ghost"
-                    className={`text-left justify-start w-full h-14 border-4 bg-zinc-700 border-white`}
+                    className={`text-left justify-start w-full h-14 border-4 bg-zinc-700 ${
+                      enhancements === "improve"
+                        ? "border-white"
+                        : "border-transparent"
+                    }`}
                     onClick={() => setEnhanements("improve")}
                   >
-                    <Ban className="w-5 h-5 mr-3" />
+                    <Wand2 className="w-5 h-5 mr-3" />
                     <span className="text-[1.01rem]">Improve</span>
                   </Button>
                 </li>
                 <li>
                   <Button
                     variant="ghost"
-                    className={`text-left justify-start w-full h-14 border-4 bg-zinc-700 border-white`}
+                    className={`text-left justify-start w-full h-14 border-4 bg-zinc-700 ${
+                      enhancements === "restore"
+                        ? "border-white"
+                        : "border-transparent"
+                    }`}
                     onClick={() => setEnhanements("restore")}
                   >
-                    <Ban className="w-5 h-5 mr-3" />
+                    <PencilRuler className="w-5 h-5 mr-3" />
                     <span className="text-[1.01rem]">Restore</span>
                   </Button>
                 </li>
                 <li>
                   <Button
                     variant="ghost"
-                    className={`text-left justify-start w-full h-14 border-4 bg-zinc-700 border-white`}
+                    className={`text-left justify-start w-full h-14 border-4 bg-zinc-700 ${
+                      enhancements === "remove-background"
+                        ? "border-white"
+                        : "border-transparent"
+                    }`}
                     onClick={() => setEnhanements("remove-background")}
                   >
-                    <Ban className="w-5 h-5 mr-3" />
+                    <ScissorsSquare className="w-5 h-5 mr-3" />
                     <span className="text-[1.01rem]">Remove background</span>
                   </Button>
                 </li>
@@ -401,6 +418,8 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResourceT }) => {
       {/** Asset viewer */}
       <div className="relative flex justify-center items-center align-center w-full h-full">
         <CldImage
+          // only using the key prop to force a re-render when the transformations change
+          key={JSON.stringify(transformations)}
           className="object-contain"
           width={resource.width}
           height={resource.height}
